@@ -14,6 +14,7 @@ constexpr unsigned char rows_count = 8;
 
 namespace hd44780{
 	constexpr unsigned char function_set_4_bit = 0x28, function_set_8_bit = 0x38;
+	constexpr unsigned char max_index = 40;
 
 	struct gpio{
 		GPIO_TypeDef* D0, * D1, * D2, * D3, * D4, * D5, * D6, * D7;
@@ -34,10 +35,48 @@ namespace hd44780{
 		enum status{
 			lcd_ok, lcd_nok
 		};
+
 	private:
+		class shift_index{
+		private:
+			unsigned char index;
+			const unsigned char max_index;
+		public:
+			shift_index() = delete;
+			shift_index(unsigned char max): index{ 0 }, max_index{ max } {}
+			bool operator==(unsigned char i)const { return index == i; }
+			bool operator>(unsigned char i)const { return index > i; }
+			bool operator>=(unsigned char i)const { return index >= i; }
+			bool operator<(unsigned char i)const { return index < i; }
+			bool operator<=(unsigned char i)const { return index <= i; }
+			bool operator!=(unsigned char i)const { return index != i; }
+
+			shift_index& operator++(){
+				if(index >= max_index - 1){
+					index = 0;
+				}
+				else{
+					++index;
+				}
+
+				return *this;
+			}
+			shift_index& operator--(){
+				if(index == 0){
+					index = max_index - 1;
+				}
+				else{
+					--index;
+				}
+
+				return *this;
+			}
+		};
+
 		gpio pinout;
 		mode lcd_mode;
 		unsigned char custom_chars_count;
+		shift_index index;
 
 		// low level private functions
 		void set_rs() { HAL_GPIO_WritePin(pinout.RS, pinout.RS_pin, GPIO_PIN_SET); }
@@ -60,15 +99,15 @@ namespace hd44780{
 
 	public:
 		lcd() = delete;
-		lcd(const gpio& pins, mode m = mode::lcd_4_bit): pinout{ pins }, lcd_mode{ m }, custom_chars_count{ 0 } { init(); }
+		lcd(const gpio& pins, mode m = mode::lcd_4_bit): pinout{ pins }, lcd_mode{ m }, custom_chars_count{ 0 }, index{ max_index } { init(); }
 		~lcd(){ }
 
 		unsigned char read_data(){ set_rs(); return read_byte(); }
 		void send_command(unsigned char cmd) { clr_rs(); send_byte(cmd); }
 		void send_data_byte(unsigned char data) { set_rs(); send_byte(data); }
 		void clear_disp(){ send_command(cmd::clear); }
-		void shift_left(){ send_command(cmd::disp_shift_left); }
-		void shift_right(){ send_command(cmd::disp_shift_right); }
+		void shift_left(){ send_command(cmd::disp_shift_left); ++index; }
+		void shift_right(){ send_command(cmd::disp_shift_right); --index; }
 		void ret_home(){ send_command(cmd::home); }
 		void write(const unsigned char* data_byte_array){
 			for(auto i = data_byte_array; *i != '\0'; ++i){
@@ -77,6 +116,7 @@ namespace hd44780{
 		}
 		status locate(unsigned char row, unsigned char col);
 		status define_custom(const unsigned char* bin_data);
+		void shift_home();
 	};
 
 }

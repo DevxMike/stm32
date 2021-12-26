@@ -37,15 +37,15 @@ void hd44780::lcd::init(){
 
 		case hd44780::lcd::mode::lcd_8_bit:
 		set_e();
-		write_full(hd44780::function_set_8_bit);
+		write_full(0x30);
 		clr_e();
 		HAL_Delay(5);
 		set_e();
-		write_full(hd44780::function_set_8_bit);
+		write_full(0x30);
 		clr_e();
 		HAL_Delay(1);
 		set_e();
-		write_full(hd44780::function_set_8_bit);
+		write_full(0x30);
 		clr_e();
 		HAL_Delay(1);
 
@@ -73,19 +73,26 @@ void hd44780::lcd::write_half(unsigned char half){
 void hd44780::lcd::write_full(unsigned char byte){
 	if(byte & (1 << 0)){ HAL_GPIO_WritePin(pinout.D0, pinout.D0_pin, GPIO_PIN_SET); }
 	else{ HAL_GPIO_WritePin(pinout.D0, pinout.D0_pin, GPIO_PIN_RESET); }
+
 	if(byte & (1 << 1)){ HAL_GPIO_WritePin(pinout.D1, pinout.D1_pin, GPIO_PIN_SET); }
 	else{ HAL_GPIO_WritePin(pinout.D1, pinout.D1_pin, GPIO_PIN_RESET); }
+
 	if(byte & (1 << 2)){ HAL_GPIO_WritePin(pinout.D2, pinout.D2_pin, GPIO_PIN_SET); }
 	else{ HAL_GPIO_WritePin(pinout.D2, pinout.D2_pin, GPIO_PIN_RESET); }
+
 	if(byte & (1 << 3)){ HAL_GPIO_WritePin(pinout.D3, pinout.D3_pin, GPIO_PIN_SET); }
 	else{ HAL_GPIO_WritePin(pinout.D3, pinout.D3_pin, GPIO_PIN_RESET); }
+
 	if(byte & (1 << 4)){ HAL_GPIO_WritePin(pinout.D4, pinout.D4_pin, GPIO_PIN_SET); }
 	else{ HAL_GPIO_WritePin(pinout.D4, pinout.D4_pin, GPIO_PIN_RESET); }
+
 	if(byte & (1 << 5)){ HAL_GPIO_WritePin(pinout.D5, pinout.D5_pin, GPIO_PIN_SET); }
 	else{ HAL_GPIO_WritePin(pinout.D5, pinout.D5_pin, GPIO_PIN_RESET); }
+
 	if(byte & (1 << 6)){ HAL_GPIO_WritePin(pinout.D6, pinout.D6_pin, GPIO_PIN_SET); }
 	else{ HAL_GPIO_WritePin(pinout.D6, pinout.D6_pin, GPIO_PIN_RESET); }
-	if(byte & (1 << 3)){ HAL_GPIO_WritePin(pinout.D7, pinout.D7_pin, GPIO_PIN_SET); }
+
+	if(byte & (1 << 7)){ HAL_GPIO_WritePin(pinout.D7, pinout.D7_pin, GPIO_PIN_SET); }
 	else{ HAL_GPIO_WritePin(pinout.D7, pinout.D7_pin, GPIO_PIN_RESET); }
 }
 
@@ -316,4 +323,19 @@ hd44780::lcd::status hd44780::lcd::define_custom(const unsigned char* bin_data){
 	}
 
 	return status::lcd_ok;
+}
+
+void hd44780::lcd::shift_home(){
+	if(index == 0){ return; }
+
+	if(index >= (max_index / 2)){
+		while(index != 0){
+			shift_left();
+		}
+	}
+	else{
+		while(index != 0){
+			shift_right();
+		}
+	}
 }
