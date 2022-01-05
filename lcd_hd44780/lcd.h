@@ -103,6 +103,7 @@ namespace hd44780{
 		~lcd(){ }
 
 		unsigned char read_data(){ set_rs(); return read_byte(); }
+		status read_line(char* buffer, unsigned char line);
 		void send_command(unsigned char cmd) { clr_rs(); send_byte(cmd); }
 		void send_data_byte(unsigned char data) { set_rs(); send_byte(data); }
 		void clear_disp(){ send_command(cmd::clear); }

@@ -300,12 +300,12 @@ void hd44780::lcd::set_gpio_in(){
 }
 
 hd44780::lcd::status hd44780::lcd::locate(unsigned char r, unsigned char c){
-	if(c > 1 || r > 39){
+	if(c > 39 || r > 1){
 		ret_home();
 		return status::lcd_nok;
 	}
 
-	unsigned char addr = (unsigned char)cmd::set_ddram + r + 0x40*c;
+	unsigned char addr = (unsigned char)cmd::set_ddram + c + 0x40*r;
 	send_command(addr);
 	return status::lcd_ok;
 }
@@ -338,4 +338,18 @@ void hd44780::lcd::shift_home(){
 			shift_right();
 		}
 	}
+}
+
+hd44780::lcd::status hd44780::lcd::read_line(char* buffer, unsigned char line){
+	if(line <= 1){
+		locate(line, 0);
+
+		for(uint8_t i = 0; i < 40; ++i){
+			buffer[i] = read_data();
+		}
+
+		return hd44780::lcd::status::lcd_ok;
+	}
+
+	return hd44780::lcd::status::lcd_nok;
 }
