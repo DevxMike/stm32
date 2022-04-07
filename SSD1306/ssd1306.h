@@ -19,7 +19,7 @@ private:
 
 	I2C_HandleTypeDef& i2c_handle;
 
-	void write_command(uint8_t cmd)
+	void write_command(uint8_t cmd);
 	void write_data(uint8_t* data, size_t len);
 
 public:
