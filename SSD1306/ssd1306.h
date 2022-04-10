@@ -19,16 +19,18 @@ private:
 
 	I2C_HandleTypeDef& i2c_handle;
 	const uint8_t slave_address;
-	uint8_t buffer[ssd1306_defs::width][ssd1306_defs::height];
+	uint8_t buffer[ssd1306_defs::height / ssd1306_defs::page_count][ssd1306_defs::width];
 
 	void write_command(uint8_t cmd);
 	void write_data(uint8_t* data, size_t len);
+	void update_display();
 
 public:
 	ssd1306(I2C_HandleTypeDef& hi2c, uint8_t slave_addr);
 	void draw_pixel(uint8_t x, uint8_t y, uint8_t color);
 	void putc(char c, uint8_t color);
 	void puts(char* str, uint8_t color);
+	void set_cursor(uint8_t x, uint8_t y);
 };
 
 #endif /* INC_SSD1306_SSD1306_H_ */
