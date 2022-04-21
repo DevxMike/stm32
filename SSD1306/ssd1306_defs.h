@@ -44,6 +44,11 @@ namespace ssd1306_defs{
 		vcomh = 0xDB,
 		dc_enable = 0x8D
 	};
+
+	enum{
+		font_width = 6,
+		font_height = 8
+	};
 }
 
 
